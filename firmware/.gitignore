@@ -1,0 +1,7 @@
+.vscode/
+build/
+managed_components/
+main/certs/ca.crt
+main/certs/client.crt
+main/certs/client.key
+main/config/secrets.h
