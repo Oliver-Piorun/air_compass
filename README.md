@@ -10,30 +10,20 @@
 > - [ ] Backend service - Next up
 > - [ ] Flutter app - Planned
 
-## Motivation
+## Overview
 
-The goal of this project is to build a smart room-monitoring system that helps reduce indoor humidity and improve ventilation.
+AirCompass is a smart room-monitoring system designed to help reduce indoor humidity and improve ventilation.
 
-An ESP32 measures the room's temperature and humidity and publishes the measurements via MQTT. A backend service consumes these measurements and stores them in a time-series database for later analysis.
+An ESP32 continuously measures the room's temperature and relative humidity and publishes the measurements via MQTT. A backend service consumes these measurements and stores them in a time-series database for historical analysis and visualization.
 
-The backend also retrieves local weather data and combines it with the indoor measurements to determine whether opening a window would be an effective way to reduce the room's humidity. If ventilation is recommended, the backend sends a push notification to the user's Flutter app.
+The backend also retrieves current local weather conditions and combines them with the indoor measurements to determine whether opening a window would effectively reduce indoor humidity. When ventilation is recommended, the backend sends a push notification to the user's Flutter app, allowing the user to take action.
 
-## How It Works
+The system is designed to:
 
-1. The ESP32 measures temperature and relative humidity.
-2. Measurements are published to an MQTT broker.
-3. The backend service consumes the MQTT messages.
-4. Measurements are stored in a time-series database.
-5. The backend retrieves the current local weather conditions.
-6. Indoor and outdoor conditions are analyzed to determine whether ventilation could reduce indoor humidity.
-7. If ventilation is recommended, the backend sends a push notification.
-8. The Flutter app receives and displays the notification.
-
-## Goals
-
-1. Monitor indoor temperature and humidity continuously
-2. Store historical measurements for analysis and visualization
-3. Combine indoor measurements with local weather data
-4. Provide actionable ventilation recommendations
-5. Notify users when ventilation is likely to reduce humidity
-6. Provide a mobile interface for monitoring the system
+- Continuously monitor indoor temperature and humidity
+- Store historical measurements for analysis and visualization
+- Combine indoor measurements with local weather data
+- Determine whether ventilation can effectively reduce indoor humidity
+- Provide actionable ventilation recommendations
+- Notify users when ventilation is recommended
+- Provide a mobile interface for monitoring the system
