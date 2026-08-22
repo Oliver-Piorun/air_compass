@@ -126,7 +126,7 @@ keyUsage = digitalSignature
 extendedKeyUsage = clientAuth
 ```
 
-This identifies the certificate as being intended for client authentication.
+This specifies that the certificate cannot act as a CA, can be used for digital signatures, and is intended for TLS client authentication.
 
 ### Sign the client certificate
 
