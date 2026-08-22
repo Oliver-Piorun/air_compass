@@ -8,7 +8,6 @@ The Certificate Authority (CA) is used to sign both the Mosquitto server certifi
 
 ```sh
 openssl genrsa -out ca.key 4096
-chmod 600 ca.key
 ```
 
 The CA private key is the most sensitive file in this setup. Anyone who obtains it can potentially create certificates trusted by your MQTT infrastructure.
@@ -32,6 +31,8 @@ This creates:
 - ca.key - CA private key
 - ca.crt - CA certificate
 
+The CA certificate is valid for 10 years.
+
 The CA certificate can be distributed to systems that need to verify certificates signed by this CA. The CA **private key must not be distributed**.
 
 ## 2. Create the Mosquitto Server Certificate
@@ -42,7 +43,6 @@ The server certificate is used by Mosquitto to provide TLS encryption and authen
 
 ```sh
 openssl genrsa -out server.key 2048
-chmod 600 server.key
 ```
 
 ### Create the server CSR
@@ -92,7 +92,7 @@ This creates:
 - server.csr - server Certificate Signing Request
 - server.crt - signed server certificate
 
-The server certificate is valid for one year.
+The server certificate is valid for 1 year.
 
 ## 3. Create the ESP32 Client Certificate
 
@@ -102,8 +102,11 @@ The client certificate is used by the ESP32 to authenticate itself to Mosquitto.
 
 ```sh
 openssl genrsa -out client.key 2048
-chmod 600 client.key
-Create the client CSR
+```
+
+### Create the client CSR
+
+```sh
 openssl req -new \
   -key client.key \
   -out client.csr
@@ -145,7 +148,7 @@ This creates:
 - client.csr - client Certificate Signing Request
 - client.crt - signed client certificate
 
-The client certificate is valid for one year.
+The client certificate is valid for 1 year.
 
 ## 4. Install the Server Certificates for Mosquitto
 
