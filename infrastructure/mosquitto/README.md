@@ -256,8 +256,8 @@ The `ca.crt` is used by both the ESP32 and backend to verify the Mosquitto serve
 
 Each client uses its own client certificate and private key to authenticate itself to Mosquitto:
 
-ESP32 → `esp32-client.crt` + `esp32-client.key`
-Backend → `backend-client.crt` + `backend-client.key`
+- ESP32 → `esp32-client.crt` + `esp32-client.key`
+- Backend → `backend-client.crt` + `backend-client.key`
 
 Do not copy the following files to either the ESP32 or backend:
 
