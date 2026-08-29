@@ -3,6 +3,15 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    container_name: backend
     # restart: unless-stopped
     ports:
       - "3000:3000"
+    networks:
+      - mosquitto_network
+      - timescaledb_network
+networks:
+  mosquitto_network:
+    external: true
+  timescaledb_network:
+    external: true
