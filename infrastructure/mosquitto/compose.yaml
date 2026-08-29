@@ -1,6 +1,7 @@
 services:
   mosquitto:
-    image: eclipse-mosquitto:2.1-alpine
+    image: eclipse-mosquitto:2.1.2-alpine
+    # restart: unless-stopped
     ports:
       - "8883:8883"
     volumes:
