@@ -66,7 +66,7 @@ The server certificate should contain the server IP address as a Subject Alterna
 Create `server-ext.cnf`:
 
 ```
-subjectAltName = IP:your-ip-address
+subjectAltName = IP:your-ip-address, DNS:mosquitto
 extendedKeyUsage = serverAuth
 ```
 
