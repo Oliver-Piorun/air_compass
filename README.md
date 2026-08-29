@@ -8,7 +8,7 @@
 >
 > - [ ] ESP32 firmware - In progress
 > - [ ] Infrastructure - In progress
-> - [ ] Backend service - Next up
+> - [ ] Backend service - In progress
 > - [ ] Flutter app - Planned
 
 ## Overview
