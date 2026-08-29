@@ -3,4 +3,5 @@ mosquitto/config/certs/*.crt
 mosquitto/config/certs/*.csr
 mosquitto/config/certs/*.key
 mosquitto/config/certs/*.srl
+mosquitto/data/
 timescaledb/postgres_password
