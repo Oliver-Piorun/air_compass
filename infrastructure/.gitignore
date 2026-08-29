@@ -1,2 +1,3 @@
 mosquitto/certs/*.crt
 mosquitto/certs/*.key
+timescaledb/postgres_password
