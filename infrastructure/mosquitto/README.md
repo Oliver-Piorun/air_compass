@@ -2,7 +2,7 @@
 
 ## 1. Create the Certificate Authority
 
-The Certificate Authority (CA) is used to sign both the Mosquitto server certificate and the ESP32 client certificate.
+The Certificate Authority (CA) is used to sign both the Mosquitto server certificate, the ESP32 client certificate and the backend client certificate.
 
 ### Generate the CA private key
 
@@ -98,25 +98,25 @@ The server certificate is valid for 1 year.
 
 The client certificate is used by the ESP32 to authenticate itself to Mosquitto.
 
-### Generate the client private key
+### Generate the ESP32 client private key
 
 ```sh
-openssl genrsa -out client.key 2048
+openssl genrsa -out esp32-client.key 2048
 ```
 
-### Create the client CSR
+### Create the ESP32 client CSR
 
 ```sh
 openssl req -new \
-  -key client.key \
-  -out client.csr
+  -key esp32-client.key \
+  -out esp32-client.csr
 ```
 
 For the Common Name, enter:
 
 `ESP32`
 
-### Create the client certificate extensions
+### Create the ESP32 client certificate extensions
 
 Create `client-ext.cnf`:
 
@@ -128,15 +128,15 @@ extendedKeyUsage = clientAuth
 
 This specifies that the certificate cannot act as a CA, can be used for digital signatures, and is intended for TLS client authentication.
 
-### Sign the client certificate
+### Sign the ESP32 client certificate
 
 ```sh
 openssl x509 -req \
-  -in client.csr \
+  -in esp32-client.csr \
   -CA ca.crt \
   -CAkey ca.key \
   -CAcreateserial \
-  -out client.crt \
+  -out esp32-client.crt \
   -days 365 \
   -sha256 \
   -extfile client-ext.cnf
@@ -144,13 +144,59 @@ openssl x509 -req \
 
 This creates:
 
-- client.key - ESP32 private key
-- client.csr - client Certificate Signing Request
-- client.crt - signed client certificate
+- esp32-client.key - ESP32 client private key
+- esp32-client.csr - ESP32 client Certificate Signing Request
+- esp32-client.crt - signed ESP32 client certificate
 
-The client certificate is valid for 1 year.
+The ESP32 client certificate is valid for 1 year.
 
-## 4. Install the Server Certificates for Mosquitto
+## 4. Create the Backend Client Certificate
+
+The backend is treated as a separate MQTT client and therefore receives its own private key and client certificate.
+
+### Generate the backend client private key
+
+```sh
+openssl genrsa -out backend-client.key 2048
+```
+
+### Create the backend client CSR
+
+```sh
+openssl req -new \
+  -key backend-client.key \
+  -out backend-client.csr
+```
+
+For the Common Name, enter:
+
+`backend`
+
+### Sign the backend client certificate
+
+The backend can reuse the existing `client-ext.cnf` because it has the same purpose as the ESP32 certificate: TLS client authentication.
+
+```sh
+openssl x509 -req \
+  -in backend-client.csr \
+  -CA ca.crt \
+  -CAkey ca.key \
+  -CAcreateserial \
+  -out backend-client.crt \
+  -days 365 \
+  -sha256 \
+  -extfile client-ext.cnf
+```
+
+This creates:
+
+- backend-client.key - backend client private key
+- backend-client.csr - backend client Certificate Signing Request
+- backend-client.crt - signed backend client certificate
+
+The backend client certificate is valid for 1 year.
+
+## 5. Install the Server Certificates for Mosquitto
 
 Once the certificates have been generated, copy the files required by Mosquitto into its certificate directory.
 
@@ -163,7 +209,8 @@ The Mosquitto server needs:
 Do no copy:
 
 - ca.key
-- client.key
+- esp32-client.key
+- backend-client.key
 
 to the certificate directory.
 
@@ -179,27 +226,45 @@ The Mosquitto server private key should only be readable by root and the user/gr
 The CA and client private keys should only be readable by the user who manages the certificates:
 
 - `sudo chmod 600 ca.key`
-- `sudo chmod 600 client.key`
+- `sudo chmod 600 esp32-client.key`
+- `sudo chmod 600 backend-client.key`
 
 The certificates can be readable by all users:
 
 - `sudo chmod 644 ca.crt`
 - `sudo chmod 644 server.crt`
-- `sudo chmod 644 client.crt`
+- `sudo chmod 644 esp32-client.crt`
+- `sudo chmod 644 backend-client.crt`
 
-## 5. Files Required by the ESP32
+## 6. Files Required by the ESP32 and Backend
 
-The ESP32 needs only the files required to establish and authenticate the TLS connection:
+The ESP32 and backend each need the files required to establish and authenticate their TLS connection to Mosquitto:
+
+### ESP32
 
 - ca.crt
-- client.crt
-- client.key
+- esp32-client.crt
+- esp32-client.key
 
-Do not copy:
+### Backend
+
+- ca.crt
+- backend-client.crt
+- backend-client.key
+
+The `ca.crt` is used by both the ESP32 and backend to verify the Mosquitto server certificate.
+
+Each client uses its own client certificate and private key to authenticate itself to Mosquitto:
+
+ESP32 → `esp32-client.crt` + `esp32-client.key`
+Backend → `backend-client.crt` + `backend-client.key`
+
+Do not copy the following files to either the ESP32 or backend:
 
 - ca.key
 - server.key
+- The other client's private key
 
-to the ESP32.
+The CA private key (`ca.key`) must remain protected and must **never** be distributed to the ESP32, backend, or Mosquitto server.
 
-The CA private key (`ca.key`) must remain protected.
+The client private keys must remain secret and should only be stored on their respective clients.

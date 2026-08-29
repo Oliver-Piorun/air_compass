@@ -22,8 +22,8 @@
 #define DHT_SENSOR_PIN GPIO_NUM_20
 
 extern const uint8_t ca_crt_start[] asm("_binary_ca_crt_start");
-extern const uint8_t client_crt_start[] asm("_binary_client_crt_start");
-extern const uint8_t client_key_start[] asm("_binary_client_key_start");
+extern const uint8_t client_crt_start[] asm("_binary_esp32_client_crt_start");
+extern const uint8_t client_key_start[] asm("_binary_esp32_client_key_start");
 
 static const char *TAG_WIFI = "WIFI";
 static const char *TAG_MQTT = "MQTT";

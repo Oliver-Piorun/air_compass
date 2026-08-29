@@ -6,6 +6,6 @@ idf_component_register(
         nvs_flash
     EMBED_TXTFILES
         certs/ca.crt
-        certs/client.crt
-        certs/client.key
+        certs/esp32-client.crt
+        certs/esp32-client.key
 )

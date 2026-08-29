@@ -10,8 +10,19 @@ services:
     networks:
       - mosquitto_network
       - timescaledb_network
+    secrets:
+      - mqtt_ca_cert
+      - mqtt_client_cert
+      - mqtt_client_key
 networks:
   mosquitto_network:
     external: true
   timescaledb_network:
     external: true
+secrets:
+  mqtt_ca_cert:
+    file: ./certs/ca.crt
+  mqtt_client_cert:
+    file: ./certs/backend-client.crt
+  mqtt_client_key:
+    file: ./certs/backend-client.key
