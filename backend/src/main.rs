@@ -17,9 +17,9 @@ use rumqttc::{
 };
 use tokio::{net::TcpListener, task};
 
-const CA_CERT: &str = "/run/secrets/mqtt-ca-cert";
-const CLIENT_CERT: &str = "/run/secrets/mqtt-client-cert";
-const CLIENT_KEY: &str = "/run/secrets/mqtt-client-key";
+const CA_CERT: &str = "/run/secrets/mqtt_ca_cert";
+const CLIENT_CERT: &str = "/run/secrets/mqtt_client_cert";
+const CLIENT_KEY: &str = "/run/secrets/mqtt_client_key";
 
 #[tokio::main]
 async fn main() {
