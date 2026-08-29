@@ -140,6 +140,7 @@ void mqtt_start(void)
         .broker.verification.certificate = (const char *)ca_crt_start,
         .credentials.authentication.certificate = (const char *)client_crt_start,
         .credentials.authentication.key = (const char *)client_key_start,
+        .credentials.client_id = "esp32"
     };
 
     esp_mqtt_client_handle = esp_mqtt_client_init(&esp_mqtt_client_config);

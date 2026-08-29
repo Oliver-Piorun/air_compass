@@ -1,4 +1,5 @@
 use std::{
+    env,
     fs::{self},
     time::Duration,
 };
@@ -23,6 +24,8 @@ const CLIENT_KEY: &str = "/run/secrets/mqtt_client_key";
 
 #[tokio::main]
 async fn main() {
+    dotenvy::dotenv().ok();
+
     let (ca_cert, client_cert, client_key) = load_certs().unwrap();
 
     let mut root_cert_store = RootCertStore::empty();
@@ -33,7 +36,13 @@ async fn main() {
         .with_client_auth_cert(vec![client_cert], client_key)
         .unwrap();
 
-    let mut mqtt_options = MqttOptions::new("air_compass_backend", "mosquitto", 8883);
+    let host = env::var("MQTT_HOST").unwrap_or_else(|_| "mosquitto".to_string());
+    let port = env::var("MQTT_PORT")
+        .ok()
+        .and_then(|port| port.parse().ok())
+        .unwrap_or(8883);
+
+    let mut mqtt_options = MqttOptions::new("backend", host, port);
     mqtt_options.set_transport(Transport::tls_with_config(tls_client_config.into()));
     mqtt_options.set_keep_alive(Duration::from_secs(5));
 
@@ -48,13 +57,13 @@ async fn main() {
         loop {
             match event_loop.poll().await {
                 Ok(Event::Incoming(Packet::Publish(publish))) => {
-                    println!("a");
+                    println!("Incoming publish! {publish:?}");
                 }
                 Ok(event) => {
-                    println!("b");
+                    println!("Event! {event:?}");
                 }
                 Err(error) => {
-                    eprintln!("c");
+                    eprintln!("Error! {error:?}");
                     break;
                 }
             }
@@ -78,9 +87,13 @@ fn load_certs() -> Result<
     ),
     Box<dyn std::error::Error>,
 > {
-    let ca_pem = fs::read(CA_CERT)?;
-    let client_cert_pem = fs::read(CLIENT_CERT)?;
-    let client_key_pem = fs::read(CLIENT_KEY)?;
+    let ca_cert_path = env::var("MQTT_CA_CERT").unwrap_or_else(|_| CA_CERT.to_string());
+    let client_cert_path = env::var("MQTT_CLIENT_CERT").unwrap_or_else(|_| CLIENT_CERT.to_string());
+    let client_key_path = env::var("MQTT_CLIENT_KEY").unwrap_or_else(|_| CLIENT_KEY.to_string());
+
+    let ca_pem = fs::read(ca_cert_path)?;
+    let client_cert_pem = fs::read(client_cert_path)?;
+    let client_key_pem = fs::read(client_key_path)?;
 
     let ca_cert = CertificateDer::from_pem_slice(&ca_pem)?;
     let client_cert = CertificateDer::from_pem_slice(&client_cert_pem)?;
