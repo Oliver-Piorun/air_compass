@@ -6,6 +6,9 @@ COPY Cargo.toml Cargo.lock ./
 COPY src ./src
 COPY migrations ./migrations
 
+ARG DATABASE_URL
+ENV DATABASE_URL="${DATABASE_URL}"
+
 RUN cargo build --release
 
 FROM debian:trixie-slim
