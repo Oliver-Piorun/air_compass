@@ -200,6 +200,6 @@ void app_main(void)
         }
 
         // DHT22 max ~0.5 Hz sampling rate
-        vTaskDelay(pdMS_TO_TICKS(5000));
+        vTaskDelay(pdMS_TO_TICKS(30000));
     }
 }
