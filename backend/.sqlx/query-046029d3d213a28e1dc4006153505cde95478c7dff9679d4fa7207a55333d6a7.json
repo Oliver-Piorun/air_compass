@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                        INSERT INTO telemetry (temperature, humidity)\n                        VALUES ($1, $2)\n                    ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Float4",
+        "Float4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "046029d3d213a28e1dc4006153505cde95478c7dff9679d4fa7207a55333d6a7"
+}

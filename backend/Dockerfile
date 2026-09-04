@@ -3,11 +3,9 @@ FROM rust:1.98.0-slim-trixie AS builder
 WORKDIR /app
 
 COPY Cargo.toml Cargo.lock ./
+COPY .sqlx .sqlx
 COPY src ./src
 COPY migrations ./migrations
-
-ARG DATABASE_URL
-ENV DATABASE_URL="${DATABASE_URL}"
 
 RUN cargo build --release
 
