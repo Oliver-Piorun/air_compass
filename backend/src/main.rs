@@ -43,7 +43,6 @@ async fn main() {
     sqlx::migrate!().run(&postgres_pool).await.unwrap();
 
     let (mqtt_async_client, mut mqtt_event_loop) = init_mqtt_client().await;
-
     mqtt_async_client
         .subscribe("telemetry", QoS::AtMostOnce)
         .await
@@ -89,6 +88,12 @@ async fn main() {
 }
 
 async fn init_postgres_pool() -> Pool<Postgres> {
+    let host = env::var("POSTGRES_HOST").unwrap_or_else(|_| "timescaledb".to_string());
+    let port = env::var("POSTGRES_PORT")
+        .ok()
+        .and_then(|port| port.parse().ok())
+        .unwrap_or(5432);
+
     let ca_cert_path =
         env::var("POSTGRES_CA_CERT").unwrap_or_else(|_| POSTGRES_CA_CERT.to_string());
     let client_cert_path =
@@ -97,8 +102,8 @@ async fn init_postgres_pool() -> Pool<Postgres> {
         env::var("POSTGRES_CLIENT_KEY").unwrap_or_else(|_| POSTGRES_CLIENT_KEY.to_string());
 
     let pg_connect_options = PgConnectOptions::new()
-        .host("127.0.0.1")
-        .port(5432)
+        .host(&host)
+        .port(port)
         .database("air_compass")
         .username("backend")
         .ssl_mode(sqlx::postgres::PgSslMode::VerifyFull)
@@ -114,6 +119,12 @@ async fn init_postgres_pool() -> Pool<Postgres> {
 }
 
 async fn init_mqtt_client() -> (rumqttc::v5::AsyncClient, rumqttc::v5::EventLoop) {
+    let host = env::var("MOSQUITTO_HOST").unwrap_or_else(|_| "mosquitto".to_string());
+    let port = env::var("MOSQUITTO_PORT")
+        .ok()
+        .and_then(|port| port.parse().ok())
+        .unwrap_or(8883);
+
     let ca_cert_path =
         env::var("MOSQUITTO_CA_CERT").unwrap_or_else(|_| MOSQUITTO_CA_CERT.to_string());
     let client_cert_path =
@@ -121,27 +132,21 @@ async fn init_mqtt_client() -> (rumqttc::v5::AsyncClient, rumqttc::v5::EventLoop
     let client_key_path =
         env::var("MOSQUITTO_CLIENT_KEY").unwrap_or_else(|_| MOSQUITTO_CLIENT_KEY.to_string());
 
-    let ca_pem = fs::read(ca_cert_path).unwrap();
+    let ca_cert_pem = fs::read(ca_cert_path).unwrap();
     let client_cert_pem = fs::read(client_cert_path).unwrap();
     let client_key_pem = fs::read(client_key_path).unwrap();
 
-    let ca_cert = CertificateDer::from_pem_slice(&ca_pem).unwrap();
-    let client_cert = CertificateDer::from_pem_slice(&client_cert_pem).unwrap();
-    let client_key = PrivateKeyDer::from_pem_slice(&client_key_pem).unwrap();
+    let ca_cert_der = CertificateDer::from_pem_slice(&ca_cert_pem).unwrap();
+    let client_cert_der = CertificateDer::from_pem_slice(&client_cert_pem).unwrap();
+    let client_key_der = PrivateKeyDer::from_pem_slice(&client_key_pem).unwrap();
 
     let mut root_cert_store = RootCertStore::empty();
-    root_cert_store.add(ca_cert).unwrap();
+    root_cert_store.add(ca_cert_der).unwrap();
 
     let tls_client_config = ClientConfig::builder()
         .with_root_certificates(root_cert_store)
-        .with_client_auth_cert(vec![client_cert], client_key)
+        .with_client_auth_cert(vec![client_cert_der], client_key_der)
         .unwrap();
-
-    let host = env::var("MOSQUITTO_HOST").unwrap_or_else(|_| "mosquitto".to_string());
-    let port = env::var("MOSQUITTO_PORT")
-        .ok()
-        .and_then(|port| port.parse().ok())
-        .unwrap_or(8883);
 
     let mut mqtt_options = MqttOptions::new("backend", host, port);
     mqtt_options.set_transport(Transport::tls_with_config(tls_client_config.into()));
