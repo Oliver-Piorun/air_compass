@@ -34,6 +34,8 @@ services:
       - ssl_cert_file=/etc/postgresql/certs/server.crt
       - -c
       - ssl_key_file=/etc/postgresql/certs/server.key
+      - -c
+      - timezone=UTC
 volumes:
   timescaledb_data:
 networks:
