@@ -23,6 +23,10 @@ services:
       - -c
       - ssl=on
       - -c
+      - ssl_min_protocol_version = 'TLSv1.3'
+      - -c
+      - ssl_max_protocol_version = 'TLSv1.3'
+      - -c
       - ssl_ca_file=/etc/postgresql/certs/ca.crt
       - -c
       - ssl_cert_file=/etc/postgresql/certs/server.crt
