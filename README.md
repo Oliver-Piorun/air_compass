@@ -8,7 +8,7 @@
 >
 > - [x] ESP32 firmware - Completed, ongoing fixes & improvements
 > - [x] Infrastructure - Completed, ongoing fixes & improvements
-> - [x] Backend service - Completed, ongoing fixes & improvements
+> - [ ] Backend service - In progress
 > - [ ] Flutter app - In progress
 
 ## Overview
