@@ -24,7 +24,7 @@ openssl req -x509 -new -nodes \
 
 When prompted for the Common Name, enter:
 
-`MQTT`
+`Mosquitto`
 
 This creates:
 
@@ -37,7 +37,7 @@ The CA certificate can be distributed to systems that need to verify certificate
 
 ## 2. Create the Mosquitto server certificate
 
-The server certificate is used by Mosquitto to provide TLS encryption and authenticate the MQTT server to clients.
+The server certificate is used by Mosquitto to provide TLS encryption and authenticate the Mosquitto server to clients.
 
 ### Generate the server private key
 
@@ -47,7 +47,7 @@ openssl genrsa -out server.key 2048
 
 ### Create the server CSR
 
-Generate a Certificate Signing Request:
+Generate a certificate signing request:
 
 ```sh
 openssl req -new \

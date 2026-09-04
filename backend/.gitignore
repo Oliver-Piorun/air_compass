@@ -1,4 +1,4 @@
 .env
-certs/*.crt
-certs/*.key
+certs/**/*.crt
+certs/**/*.key
 target/

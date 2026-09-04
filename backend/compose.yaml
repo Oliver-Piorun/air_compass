@@ -11,18 +11,27 @@ services:
       - mosquitto_network
       - timescaledb_network
     secrets:
-      - mqtt_ca_cert
-      - mqtt_client_cert
-      - mqtt_client_key
+      - mosquitto_ca_cert
+      - mosquitto_client_cert
+      - mosquitto_client_key
+      - postgres_ca_cert
+      - postgres_client_cert
+      - postgres_client_key
 networks:
   mosquitto_network:
     external: true
   timescaledb_network:
     external: true
 secrets:
-  mqtt_ca_cert:
-    file: ./certs/ca.crt
-  mqtt_client_cert:
-    file: ./certs/backend-client.crt
-  mqtt_client_key:
-    file: ./certs/backend-client.key
+  mosquitto_ca_cert:
+    file: ./certs/mosquitto/ca.crt
+  mosquitto_client_cert:
+    file: ./certs/mosquitto/backend-client.crt
+  mosquitto_client_key:
+    file: ./certs/mosquitto/backend-client.key
+  postgres_ca_cert:
+    file: ./certs/postgres/ca.crt
+  postgres_client_cert:
+    file: ./certs/postgres/backend-client.crt
+  postgres_client_key:
+    file: ./certs/postgres/backend-client.key

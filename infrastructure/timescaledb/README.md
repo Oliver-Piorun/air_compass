@@ -47,7 +47,7 @@ openssl genrsa -out server.key 2048
 
 ### Create the server CSR
 
-Generate a Certificate Signing Request:
+Generate a certificate signing request:
 
 ```sh
 openssl req -new \
