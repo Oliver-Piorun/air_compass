@@ -32,6 +32,7 @@ static const char *TAG_DHT22 = "DHT22";
 static EventGroupHandle_t wifi_event_group_handle;
 
 static esp_mqtt_client_handle_t esp_mqtt_client_handle;
+static bool mqtt_connected = false;
 
 static void wifi_event_handler(void *event_handler_arg, esp_event_base_t event_base, int32_t event_id, void *event_data)
 {
@@ -61,9 +62,11 @@ static void mqtt_event_handler(void *event_handler_arg, esp_event_base_t event_b
     switch (esp_mqtt_event_handle->event_id)
     {
     case MQTT_EVENT_CONNECTED:
+        mqtt_connected = true;
         ESP_LOGI(TAG_MQTT, "Connected to broker");
         break;
     case MQTT_EVENT_DISCONNECTED:
+        mqtt_connected = false;
         ESP_LOGW(TAG_MQTT, "Disconnected from broker");
         break;
     case MQTT_EVENT_ERROR:
@@ -140,8 +143,7 @@ void mqtt_start(void)
         .broker.verification.certificate = (const char *)ca_crt_start,
         .credentials.authentication.certificate = (const char *)client_crt_start,
         .credentials.authentication.key = (const char *)client_key_start,
-        .credentials.client_id = "esp32"
-    };
+        .credentials.client_id = "esp32"};
 
     esp_mqtt_client_handle = esp_mqtt_client_init(&esp_mqtt_client_config);
 
@@ -177,6 +179,20 @@ void app_main(void)
         {
             ESP_LOGI(TAG_DHT22, "Temperature: %.1f °C", temperature);
             ESP_LOGI(TAG_DHT22, "Humidity: %.1f %%", humidity);
+
+            char payload[128];
+            snprintf(payload, sizeof(payload), "{\"temperature\":%.1f,\"humidity\":%.1f}", temperature, humidity);
+
+            if (mqtt_connected)
+            {
+                esp_mqtt_client_publish(
+                    esp_mqtt_client_handle,
+                    "telemetry", // topic
+                    payload,
+                    0,  // len (calculated from payload string)
+                    1,  // qos
+                    0); // retain
+            }
         }
         else
         {
@@ -184,6 +200,6 @@ void app_main(void)
         }
 
         // DHT22 max ~0.5 Hz sampling rate
-        vTaskDelay(pdMS_TO_TICKS(2000));
+        vTaskDelay(pdMS_TO_TICKS(5000));
     }
 }
