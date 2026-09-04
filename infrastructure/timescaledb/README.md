@@ -57,7 +57,7 @@ openssl req -new \
 
 For the Common Name, enter:
 
-`your-ip-address`
+`127.0.0.1`
 
 ### Create the server certificate extensions
 
