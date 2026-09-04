@@ -6,10 +6,10 @@
 >
 > This project is currently under active development. Features, architecture, and implementation details may change as development progresses.
 >
-> - [ ] ESP32 firmware - In progress
-> - [ ] Infrastructure - In progress
-> - [ ] Backend service - In progress
-> - [ ] Flutter app - Planned
+> - [x] ESP32 firmware - Completed, ongoing fixes & improvements
+> - [x] Infrastructure - Completed, ongoing fixes & improvements
+> - [x] Backend service - Completed, ongoing fixes & improvements
+> - [ ] Flutter app - In progress
 
 ## Overview
 
