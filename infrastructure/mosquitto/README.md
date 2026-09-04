@@ -66,7 +66,7 @@ The server certificate should contain the server IP address and/or hostname that
 Create `server-ext.cnf`:
 
 ```
-subjectAltName = IP:your-ip-address, DNS:mosquitto
+subjectAltName = IP:127.0.0.1, IP:your-ip-address, DNS:localhost, DNS:mosquitto
 extendedKeyUsage = serverAuth
 ```
 

@@ -66,7 +66,7 @@ The server certificate should contain the server IP address and/or hostname that
 Create `server-ext.cnf`:
 
 ```
-subjectAltName = IP:your-ip-address, DNS:timescaledb
+subjectAltName = IP:127.0.0.1, DNS:localhost, DNS:timescaledb
 extendedKeyUsage = serverAuth
 ```
 
