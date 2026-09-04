@@ -1,6 +1,7 @@
 CREATE ROLE backend LOGIN;
 
 GRANT CONNECT ON DATABASE air_compass TO backend;
+GRANT CREATE ON DATABASE air_compass TO backend;
 
 GRANT USAGE, CREATE ON SCHEMA public TO backend;
 
