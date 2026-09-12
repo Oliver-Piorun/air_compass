@@ -14,6 +14,10 @@ where
 {
     dotenvy::dotenv().ok();
 
+    rustls::crypto::ring::default_provider()
+        .install_default()
+        .map_err(|_| anyhow::anyhow!("Failed to install ring TLS provider"))?;
+
     let postgres_pool = database::init_postgres_pool().await.unwrap();
     sqlx::migrate!().run(&postgres_pool).await.unwrap();
 
