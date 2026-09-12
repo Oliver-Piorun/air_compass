@@ -241,11 +241,6 @@ hostssl     air_compass backend    172.22.0.0/16    cert
 hostnossl   air_compass backend    172.22.0.0/16    reject
 ```
 
-Replace `172.22.0.0/16` with the subnet of the Docker network used by the backend and TimescaleDB:
-
-```sh
-docker network inspect timescaledb_network \
-  --format '{{range .IPAM.Config}}{{.Subnet}}{{end}}'
-```
+The `172.22.0.0/16` subnet is the subnet assigned to the `timescaledb_network` Docker network when it is created. See the [infrastructure README](../README.md#docker-networks) for the Docker network configuration.
 
 The `backend` user must match the Common Name (`CN`) of the backend client certificate.
