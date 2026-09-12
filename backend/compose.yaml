@@ -7,8 +7,10 @@ services:
     ports:
       - "3000:3000"
     networks:
-      - mosquitto_network
-      - timescaledb_network
+      mosquitto_network:
+        gw_priority: 100
+      timescaledb_network:
+        gw_priority: 0
     secrets:
       - mosquitto_ca_cert
       - mosquitto_client_cert
