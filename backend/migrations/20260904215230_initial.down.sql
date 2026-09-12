@@ -1,1 +1,1 @@
-DROP TABLE IF EXISTS telemetry;
+DROP TABLE IF EXISTS observations;

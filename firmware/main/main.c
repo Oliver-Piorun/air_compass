@@ -165,23 +165,23 @@ void app_main(void)
     mqtt_start();
 
     float temperature;
-    float humidity;
+    float relative_humidity;
 
     while (1)
     {
         esp_err_t esp_err = dht_read_float_data(
             DHT_TYPE_AM2301,
             DHT_SENSOR_PIN,
-            &humidity,
+            &relative_humidity,
             &temperature);
 
         if (esp_err == ESP_OK)
         {
             ESP_LOGI(TAG_DHT22, "Temperature: %.1f °C", temperature);
-            ESP_LOGI(TAG_DHT22, "Humidity: %.1f %%", humidity);
+            ESP_LOGI(TAG_DHT22, "Relative humidity: %.1f %%", relative_humidity);
 
             char payload[128];
-            snprintf(payload, sizeof(payload), "{\"temperature\":%.1f,\"humidity\":%.1f}", temperature, humidity);
+            snprintf(payload, sizeof(payload), "{\"temperature\":%.1f,\"relative_humidity\":%.1f}", temperature, relative_humidity);
 
             if (mqtt_connected)
             {
