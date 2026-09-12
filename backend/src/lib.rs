@@ -12,6 +12,10 @@ where
     F: Fn() -> Fut + Send + 'static,
     Fut: Future<Output = anyhow::Result<OutdoorWeather>> + Send + 'static,
 {
+    rustls::crypto::ring::default_provider()
+        .install_default()
+        .map_err(|_| anyhow::anyhow!("Failed to install ring TLS provider"))?;
+
     dotenvy::dotenv().ok();
 
     let postgres_pool = database::init_postgres_pool().await.unwrap();
