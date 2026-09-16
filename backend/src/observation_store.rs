@@ -1,4 +1,3 @@
-use anyhow::Context;
 use sqlx::{Pool, Postgres};
 
 use crate::observation::Observation;
@@ -24,8 +23,7 @@ pub async fn store(pool: &Pool<Postgres>, observation: &Observation) -> anyhow::
         observation.outdoor_absolute_humidity
     )
     .execute(pool)
-    .await
-    .context("Failed to store observation")?;
+    .await?;
 
     Ok(())
 }

@@ -54,7 +54,9 @@ where
 
                 let observation = Observation::from_sources(telemetry, outdoor_weather);
 
-                observation_store::store(&pool, &observation).await?;
+                if let Err(e) = observation_store::store(&pool, &observation).await {
+                    eprintln!("Failed to store observation: {e}");
+                }
             }
 
             Ok(event) => {
