@@ -29,16 +29,29 @@ where
     async_client
         .subscribe("telemetry", QoS::AtMostOnce)
         .await
-        .context("Failed to subscribe to telemetry")?;
+        .context("Failed to subscribe to telemetry topic")?;
 
     loop {
         match event_loop.poll().await {
             Ok(Event::Incoming(Packet::Publish(publish))) => {
                 println!("Incoming publish! {publish:?}");
 
-                let telemetry = serde_json::from_slice(&publish.payload)
-                    .context("Failed to deserialize telemetry")?;
-                let outdoor_weather = get_outdoor_weather().await?;
+                let telemetry = match serde_json::from_slice(&publish.payload) {
+                    Ok(telemetry) => telemetry,
+                    Err(e) => {
+                        eprintln!("Failed to deserialize telemetry JSON: {e}");
+                        continue;
+                    }
+                };
+
+                let outdoor_weather = match get_outdoor_weather().await {
+                    Ok(outdoor_weather) => outdoor_weather,
+                    Err(e) => {
+                        eprintln!("Failed to get outdoor weather: {e}");
+                        continue;
+                    }
+                };
+
                 let observation = Observation::from_sources(telemetry, outdoor_weather);
 
                 observation_store::store(&pool, &observation).await?;
