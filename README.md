@@ -9,7 +9,7 @@
 > - [x] ESP32 firmware - Completed, ongoing fixes & improvements
 > - [x] Infrastructure - Completed, ongoing fixes & improvements
 > - [ ] Backend service - In progress
-> - [ ] Flutter app - In progress
+> - [ ] Mobile app - In progress
 
 ## Overview
 
@@ -17,7 +17,7 @@ AirCompass is a smart room-monitoring system designed to help reduce indoor humi
 
 An ESP32 continuously measures the room's temperature and relative humidity and publishes the measurements via MQTT. A backend service consumes these measurements and stores them in a time-series database for historical analysis and visualization.
 
-The backend also retrieves current local weather conditions and combines them with the indoor measurements to determine whether opening a window would effectively reduce indoor humidity. When ventilation is recommended, the backend sends a push notification to the user's Flutter app, allowing the user to take action.
+The backend also retrieves current local weather conditions and combines them with the indoor measurements to determine whether opening a window would effectively reduce indoor humidity. When ventilation is recommended, the backend sends a push notification to the user's AirCompass mobile app, allowing the user to take action.
 
 The system is designed to:
 
