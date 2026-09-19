@@ -7,16 +7,23 @@ plugins {
 
 kotlin {
     compilerOptions {
-        jvmTarget = JvmTarget.JVM_11
+        jvmTarget = JvmTarget.JVM_25
     }
 }
 dependencies {
-    implementation(project(":sharedUI"))
+    // Kotlin Multiplatform (KMP) shared logic
+    implementation(project(":sharedLogic"))
 
+    // Compose + Activity integration
     implementation(libs.androidx.activity.compose)
 
-    implementation(libs.compose.uiToolingPreview)
-    debugImplementation(libs.compose.uiTooling)
+    // Compose
+    implementation(libs.androidx.compose.ui)
+    implementation(libs.androidx.compose.ui.tooling.preview)
+    implementation(libs.androidx.compose.material3)
+
+    // Android Studio Tooling
+    debugImplementation(libs.androidx.compose.ui.tooling)
 }
 
 android {
@@ -45,8 +52,8 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_25
+        targetCompatibility = JavaVersion.VERSION_25
     }
     buildFeatures {
         compose = true
