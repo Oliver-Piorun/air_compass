@@ -4,6 +4,7 @@ use sqlx::{
     postgres::{PgConnectOptions, PgPoolOptions},
 };
 use std::env;
+use tracing::info;
 
 const POSTGRES_CA_CERT: &str = "/run/secrets/postgres_ca_cert";
 const POSTGRES_CLIENT_CERT: &str = "/run/secrets/postgres_client_cert";
@@ -33,9 +34,15 @@ pub async fn init_postgres_pool() -> anyhow::Result<Pool<Postgres>> {
         .ssl_client_cert(client_cert_path)
         .ssl_client_key(client_key_path);
 
-    PgPoolOptions::new()
+    info!("Initializing PostgreSQL connection pool");
+
+    let pool = PgPoolOptions::new()
         .max_connections(10)
         .connect_with(options)
         .await
-        .context("Failed to connect to PostgreSQL")
+        .context("Failed to initialize PostgreSQL connection pool")?;
+
+    info!("PostgreSQL connection pool initialized");
+
+    Ok(pool)
 }

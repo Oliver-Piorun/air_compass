@@ -11,6 +11,9 @@ services:
         gw_priority: 1
       timescaledb_network:
         gw_priority: 0
+    environment:
+      RUST_LOG_CONSOLE: "info"
+      RUST_LOG_FILE: "debug"
     secrets:
       - mosquitto_ca_cert
       - mosquitto_client_cert

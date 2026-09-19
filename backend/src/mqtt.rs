@@ -12,6 +12,7 @@ use rustls::{
 };
 use sqlx::{Pool, Postgres};
 use std::{env, fs, time::Duration};
+use tracing::{debug, error, info, trace, warn};
 
 use crate::{models::OutdoorWeather, observation::Observation, observation_store};
 
@@ -24,47 +25,75 @@ where
     F: Fn() -> Fut,
     Fut: Future<Output = anyhow::Result<OutdoorWeather>>,
 {
+    info!("Initializing MQTT client");
+
     let (async_client, mut event_loop) = init_mqtt_client().await;
+
+    info!("MQTT client initialized");
 
     async_client
         .subscribe("telemetry", QoS::AtMostOnce)
         .await
         .context("Failed to subscribe to telemetry topic")?;
 
+    let mut connected = false;
+
     loop {
         match event_loop.poll().await {
             Ok(Event::Incoming(Packet::Publish(publish))) => {
-                println!("Incoming publish! {publish:?}");
+                trace!("MQTT event: Incoming publish: {publish:?}");
+
+                if !connected {
+                    info!("Connected to MQTT broker");
+                    connected = true;
+                }
+
+                info!("Telemetry JSON received");
+                debug!("Deserializing telemetry JSON");
 
                 let telemetry = match serde_json::from_slice(&publish.payload) {
                     Ok(telemetry) => telemetry,
                     Err(e) => {
-                        eprintln!("Failed to deserialize telemetry JSON: {e}");
+                        error!("Failed to deserialize telemetry JSON: {e}");
                         continue;
                     }
                 };
+
+                debug!("Telemetry JSON deserialized");
+                debug!("Retrieving outdoor weather");
 
                 let outdoor_weather = match get_outdoor_weather().await {
                     Ok(outdoor_weather) => outdoor_weather,
                     Err(e) => {
-                        eprintln!("Failed to get outdoor weather: {e}");
+                        warn!("Failed to retrieve outdoor weather: {e}");
                         continue;
                     }
                 };
 
+                info!("Outdoor weather retrieved");
+
                 let observation = Observation::from_sources(telemetry, outdoor_weather);
 
+                debug!("Storing observation");
+
                 if let Err(e) = observation_store::store(&pool, &observation).await {
-                    eprintln!("Failed to store observation: {e}");
+                    error!("Failed to store observation: {e}");
                 }
+
+                info!("Observation stored");
             }
 
             Ok(event) => {
-                println!("MQTT event: {event:?}");
+                debug!("MQTT event: {event:?}");
             }
 
-            Err(error) => {
-                return Err(error).context("MQTT event loop failed");
+            Err(connection_error) => {
+                if connected {
+                    warn!("Disconnected from MQTT broker: {connection_error}");
+                    connected = false;
+                } else {
+                    error!("MQTT connection error: {connection_error}");
+                }
             }
         }
     }

@@ -1,6 +1,7 @@
 use crate::models::OutdoorWeather;
 
 pub mod database;
+pub mod logging;
 pub mod models;
 pub mod mqtt;
 pub mod observation;
@@ -17,6 +18,8 @@ where
     rustls::crypto::ring::default_provider()
         .install_default()
         .map_err(|_| anyhow::anyhow!("Failed to install ring TLS provider"))?;
+
+    logging::init().unwrap();
 
     let postgres_pool = database::init_postgres_pool().await.unwrap();
     sqlx::migrate!().run(&postgres_pool).await.unwrap();
