@@ -84,7 +84,7 @@ where
             }
 
             Ok(event) => {
-                debug!("MQTT event: {event:?}");
+                trace!("MQTT event: {event:?}");
             }
 
             Err(connection_error) => {
