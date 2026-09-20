@@ -13,22 +13,55 @@ use sqlx::{Pool, Postgres};
 use std::{env, fs, time::Duration};
 use tracing::{debug, error, info, trace, warn};
 
-use crate::{models::OutdoorWeather, observation::Observation, observation_store};
+use crate::{
+    models::{OutdoorWeather, Telemetry},
+    observation::Observation,
+    observation_store,
+};
 
 const MOSQUITTO_CA_CERT: &str = "/run/secrets/mosquitto_ca_cert";
 const MOSQUITTO_CLIENT_CERT: &str = "/run/secrets/mosquitto_client_cert";
 const MOSQUITTO_CLIENT_KEY: &str = "/run/secrets/mosquitto_client_key";
 
-pub async fn run<F, Fut>(pool: Pool<Postgres>, get_outdoor_weather: F) -> anyhow::Result<()>
+pub async fn run<F, Fut>(postgres_pool: Pool<Postgres>, get_outdoor_weather: F)
 where
-    F: Fn() -> Fut,
-    Fut: Future<Output = anyhow::Result<OutdoorWeather>>,
+    F: Fn() -> Fut + Send + 'static,
+    Fut: Future<Output = anyhow::Result<OutdoorWeather>> + Send + 'static,
 {
     info!("Initializing MQTT client");
 
     let (async_client, mut event_loop) = init_mqtt_client().await;
 
     info!("MQTT client initialized");
+
+    let (tx, mut rx) = tokio::sync::mpsc::channel::<Telemetry>(10);
+
+    tokio::spawn(async move {
+        while let Some(telemetry) = rx.recv().await {
+            debug!("Retrieving outdoor weather");
+
+            let outdoor_weather = match get_outdoor_weather().await {
+                Ok(outdoor_weather) => outdoor_weather,
+                Err(e) => {
+                    warn!("Failed to retrieve outdoor weather: {e}");
+                    continue;
+                }
+            };
+
+            info!("Outdoor weather retrieved");
+
+            let observation = Observation::from_sources(telemetry, outdoor_weather);
+
+            debug!("Storing observation");
+
+            if let Err(e) = observation_store::store(&postgres_pool, &observation).await {
+                error!("Failed to store observation: {e}");
+                continue;
+            }
+
+            info!("Observation stored");
+        }
+    });
 
     loop {
         match event_loop.poll().await {
@@ -47,27 +80,13 @@ where
                 };
 
                 debug!("Telemetry JSON deserialized");
-                debug!("Retrieving outdoor weather");
 
-                let outdoor_weather = match get_outdoor_weather().await {
-                    Ok(outdoor_weather) => outdoor_weather,
-                    Err(e) => {
-                        warn!("Failed to retrieve outdoor weather: {e}");
-                        continue;
-                    }
-                };
-
-                info!("Outdoor weather retrieved");
-
-                let observation = Observation::from_sources(telemetry, outdoor_weather);
-
-                debug!("Storing observation");
-
-                if let Err(e) = observation_store::store(&pool, &observation).await {
-                    error!("Failed to store observation: {e}");
+                if let Err(e) = tx.send(telemetry).await {
+                    error!("Failed to enqueue telemetry: {e}");
+                    continue;
                 }
 
-                info!("Observation stored");
+                debug!("Telemetry enqueued");
             }
 
             Ok(Event::Incoming(Packet::ConnAck(_))) => {

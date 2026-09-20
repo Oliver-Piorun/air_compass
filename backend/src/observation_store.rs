@@ -2,7 +2,10 @@ use sqlx::{Pool, Postgres};
 
 use crate::observation::Observation;
 
-pub async fn store(pool: &Pool<Postgres>, observation: &Observation) -> anyhow::Result<()> {
+pub async fn store(
+    postgres_pool: &Pool<Postgres>,
+    observation: &Observation,
+) -> anyhow::Result<()> {
     sqlx::query!(
         r#"
         INSERT INTO observations (
@@ -22,7 +25,7 @@ pub async fn store(pool: &Pool<Postgres>, observation: &Observation) -> anyhow::
         observation.outdoor_relative_humidity,
         observation.outdoor_absolute_humidity
     )
-    .execute(pool)
+    .execute(postgres_pool)
     .await?;
 
     Ok(())
