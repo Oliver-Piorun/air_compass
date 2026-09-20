@@ -131,7 +131,7 @@ async fn init_mqtt_client() -> (rumqttc::v5::AsyncClient, rumqttc::v5::EventLoop
 
     let mut mqtt_options = MqttOptions::new("backend", host, port);
     mqtt_options.set_transport(Transport::tls_with_config(tls_client_config.into()));
-    mqtt_options.set_keep_alive(Duration::from_secs(5));
+    mqtt_options.set_keep_alive(Duration::from_secs(30));
 
     AsyncClient::new(mqtt_options, 10)
 }
