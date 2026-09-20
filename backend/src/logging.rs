@@ -1,5 +1,5 @@
 use anyhow::Context;
-use std::fs::OpenOptions;
+use std::fs::{self, OpenOptions};
 use tracing_subscriber::{EnvFilter, Layer, layer::SubscriberExt, util::SubscriberInitExt};
 
 pub fn init() -> anyhow::Result<()> {
@@ -8,10 +8,12 @@ pub fn init() -> anyhow::Result<()> {
     let file_filter =
         EnvFilter::try_from_env("RUST_LOG_FILE").unwrap_or_else(|_| EnvFilter::new("debug"));
 
+    fs::create_dir_all("logs").context("Failed to create log directory")?;
+
     let log_file = OpenOptions::new()
         .create(true)
         .append(true)
-        .open("app.log")
+        .open("logs/app.log")
         .context("Failed to open log file")?;
 
     tracing_subscriber::registry()

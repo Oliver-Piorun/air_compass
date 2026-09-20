@@ -6,6 +6,8 @@ services:
     restart: unless-stopped
     ports:
       - "3000:3000"
+    volumes:
+      - ./logs:/app/logs
     networks:
       mosquitto_network:
         gw_priority: 1

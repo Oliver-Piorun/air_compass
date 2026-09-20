@@ -1,5 +1,5 @@
 .env
-app.log
 certs/**/*.crt
 certs/**/*.key
+logs/
 target/
