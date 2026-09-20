@@ -1,4 +1,4 @@
-package com.example.aircompass
+package com.example.aircompass.ui
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
@@ -13,6 +13,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.example.aircompass.Greeting
 
 @Composable
 @Preview
