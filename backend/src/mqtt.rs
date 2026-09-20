@@ -1,6 +1,6 @@
 use anyhow::Context;
 use rumqttc::{
-    Transport,
+    Outgoing, Transport,
     v5::{
         AsyncClient, Event, MqttOptions,
         mqttbytes::{QoS, v5::Packet},
@@ -36,17 +36,10 @@ where
         .await
         .context("Failed to subscribe to telemetry topic")?;
 
-    let mut connected = false;
-
     loop {
         match event_loop.poll().await {
             Ok(Event::Incoming(Packet::Publish(publish))) => {
                 trace!("MQTT event: Incoming publish: {publish:?}");
-
-                if !connected {
-                    info!("Connected to MQTT broker");
-                    connected = true;
-                }
 
                 info!("Telemetry JSON received");
                 debug!("Deserializing telemetry JSON");
@@ -83,17 +76,24 @@ where
                 info!("Observation stored");
             }
 
+            Ok(Event::Incoming(Packet::ConnAck(_))) => {
+                info!("Connected to MQTT broker");
+            }
+
+            Ok(Event::Outgoing(Outgoing::Subscribe(_))) => {
+                info!("Subscribing to telemetry topic");
+            }
+
+            Ok(Event::Incoming(Packet::SubAck(_))) => {
+                info!("Subscribed to telemetry topic");
+            }
+
             Ok(event) => {
                 trace!("MQTT event: {event:?}");
             }
 
             Err(connection_error) => {
-                if connected {
-                    warn!("Disconnected from MQTT broker: {connection_error}");
-                    connected = false;
-                } else {
-                    error!("MQTT connection error: {connection_error}");
-                }
+                error!("MQTT connection error: {connection_error}");
             }
         }
     }
