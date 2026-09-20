@@ -1,4 +1,3 @@
-use anyhow::Context;
 use rumqttc::{
     Outgoing, Transport,
     v5::{
@@ -30,11 +29,6 @@ where
     let (async_client, mut event_loop) = init_mqtt_client().await;
 
     info!("MQTT client initialized");
-
-    async_client
-        .subscribe("telemetry", QoS::AtMostOnce)
-        .await
-        .context("Failed to subscribe to telemetry topic")?;
 
     loop {
         match event_loop.poll().await {
@@ -78,6 +72,10 @@ where
 
             Ok(Event::Incoming(Packet::ConnAck(_))) => {
                 info!("Connected to MQTT broker");
+
+                if let Err(e) = async_client.subscribe("telemetry", QoS::AtMostOnce).await {
+                    error!("Failed to subscribe to telemetry topic: {e}");
+                }
             }
 
             Ok(Event::Outgoing(Outgoing::Subscribe(_))) => {
